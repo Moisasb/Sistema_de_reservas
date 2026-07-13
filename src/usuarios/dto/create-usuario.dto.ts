@@ -13,23 +13,23 @@ export class CreateUsuarioDto {
   @ApiProperty({ example: 'Fernanda Nalon' })
   @IsString()
   @IsNotEmpty()
-  nome: string;
+  nome!: string;
 
   @ApiProperty({ example: 'fernanda@email.com' })
   @IsEmail()
   @IsNotEmpty()
-  email: string;
+  email!: string;
 
   @ApiProperty({ example: '123456' })
   @IsString()
   @MinLength(6)
   @IsNotEmpty()
-  senha: string;
+  senha!: string;
 
   @ApiProperty({ example: '11987654321' })
   @IsString()
   @IsNotEmpty()
-  telefone: string;
+  telefone!: string;
 
   @ApiProperty({ example: '01001-000' })
   @IsString()
@@ -37,7 +37,7 @@ export class CreateUsuarioDto {
     message: 'CEP inválido. Formato esperado: 00000-000',
   })
   @IsNotEmpty()
-  cep: string;
+  cep!: string;
 
   @ApiPropertyOptional({ example: 'Praça da Sé' })
   @IsOptional()
@@ -62,10 +62,10 @@ export class CreateUsuarioDto {
   @ApiProperty({ example: 'Desenvolvedora' })
   @IsString()
   @IsNotEmpty()
-  profissao: string;
+  profissao!: string;
 
   @ApiProperty({ example: '1998-04-29' })
   @IsDateString()
   @IsNotEmpty()
-  data_nascimento: string;
+  data_nascimento!: string;
 }

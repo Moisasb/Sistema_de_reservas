@@ -1,6 +1,11 @@
 import { Controller, Get, Param } from '@nestjs/common';
-import { ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { Public } from '../auth/decorators/public.decorator';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiParam,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import { EnderecoService } from './endereco.service';
 
 @ApiTags('Endereço')
@@ -8,8 +13,8 @@ import { EnderecoService } from './endereco.service';
 export class EnderecoController {
   constructor(private readonly enderecoService: EnderecoService) {}
 
-  @Public()
   @Get(':cep')
+  @ApiBearerAuth('access-token')
   @ApiOperation({ summary: 'Consultar endereço a partir de um CEP' })
   @ApiParam({ name: 'cep', example: '01001000' })
   @ApiResponse({ status: 200, description: 'Endereço encontrado.' })

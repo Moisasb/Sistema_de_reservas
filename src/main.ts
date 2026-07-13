@@ -26,9 +26,9 @@ async function bootstrap() {
   );
 
   const config = new DocumentBuilder()
-    .setTitle('API de Gerenciamento de Usuários')
+    .setTitle('Sistema de Reservas')
     .setDescription(
-      'API desenvolvida em NestJS com autenticação JWT, banco de dados MySQL, integração com serviço externo de CEP (ViaCEP) e Session.',
+      'API do Sistema de Reservas desenvolvida em NestJS com autenticação JWT, banco de dados MySQL, integração com serviço externo de CEP (ViaCEP) e Session.',
     )
     .setVersion('1.0')
     .addBearerAuth(

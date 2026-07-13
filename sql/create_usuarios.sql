@@ -1,6 +1,6 @@
-create database if not exists api_usuarios;
+create database if not exists sistema_reservas;
 
-use api_usuarios;
+use sistema_reservas;
 
 create table if not exists usuarios (
   id int auto_increment primary key,
