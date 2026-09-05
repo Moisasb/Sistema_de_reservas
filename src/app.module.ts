@@ -6,6 +6,7 @@ import { AuthGuard } from './auth/auth.guard';
 import { AuthModule } from './auth/auth.module';
 import { DatabaseModule } from './database/database.module';
 import { EnderecoModule } from './endereco/endereco.module';
+import { ReservasModule } from './reservas/reservas.module';
 import { UsuariosModule } from './usuarios/usuarios.module';
 
 @Module({
@@ -15,6 +16,7 @@ import { UsuariosModule } from './usuarios/usuarios.module';
     AuthModule,
     UsuariosModule,
     EnderecoModule,
+    ReservasModule,
   ],
   controllers: [AppController],
   providers: [
