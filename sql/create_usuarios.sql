@@ -1,22 +1,20 @@
-create database if not exists sistema_reservas;
+CREATE DATABASE IF NOT EXISTS sistema_reservas;
 
-use sistema_reservas;
+USE sistema_reservas;
 
-create table if not exists usuarios (
-  id int auto_increment primary key,
-  nome varchar(150) not null,
-  email varchar(150) not null unique,
-  senha varchar(255) not null,
-  telefone varchar(20) not null,
-  cep varchar(9) not null,
-  rua varchar(150) not null,
-  bairro varchar(100) not null,
-  cidade varchar(100) not null,
-  estado varchar(2) not null,
-  profissao varchar(100) not null,
-  data_nascimento date not null,
-  criado_em timestamp default current_timestamp,
-  atualizado_em timestamp default current_timestamp on update current_timestamp
+CREATE TABLE IF NOT EXISTS usuarios (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  nome VARCHAR(150) NOT NULL,
+  email VARCHAR(150) NOT NULL UNIQUE,
+  senha VARCHAR(255) NOT NULL,
+  telefone VARCHAR(20) NOT NULL,
+  cep VARCHAR(9) NOT NULL,
+  rua VARCHAR(150) NOT NULL,
+  bairro VARCHAR(100) NOT NULL,
+  cidade VARCHAR(100) NOT NULL,
+  estado VARCHAR(2) NOT NULL,
+  profissao VARCHAR(100) NOT NULL,
+  data_nascimento DATE NOT NULL,
+  criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
-
-create index idx_usuarios_email on usuarios (email);
