@@ -1,8 +1,6 @@
 # Sistema de Reservas
 
-API REST desenvolvida em NestJS para gerenciamento de usuários, autenticação, endereços e localização geográfica.
-
-> O repositório está sendo usado como projeto principal de backend. O domínio de reservas propriamente dito ainda não possui uma implementação de negócio neste código-base; por isso, esta consolidação não cria módulos ou regras fictícias de reservas.
+API REST desenvolvida em NestJS para gerenciamento de usuários, autenticação, endereços, localização geográfica e reservas.
 
 ## Funcionalidades
 
@@ -15,8 +13,12 @@ API REST desenvolvida em NestJS para gerenciamento de usuários, autenticação,
 - Sessão com `express-session`
 - CRUD de usuários
 - Consulta de endereço por CEP
-- Preenchimento de endereço usando ViaCEP
+- Integração com ViaCEP
 - Consulta de latitude e longitude por cidade usando Open-Meteo
+- Criação e consulta de reservas
+- Atualização de reservas
+- Cancelamento de reservas
+- Relacionamento entre usuários e reservas
 - Documentação da API com Swagger
 - Banco MySQL usando `mysql2/promise` e SQL direto
 
@@ -57,6 +59,15 @@ Sistema_de_reservas/
 │   │   ├── endereco.controller.ts
 │   │   ├── endereco.module.ts
 │   │   └── endereco.service.ts
+│   ├── reservas/
+│   │   ├── dto/
+│   │   │   ├── create-reserva.dto.ts
+│   │   │   └── update-reserva.dto.ts
+│   │   ├── interface/
+│   │   │   └── reserva.interface.ts
+│   │   ├── reservas.controller.ts
+│   │   ├── reservas.module.ts
+│   │   └── reservas.service.ts
 │   ├── usuarios/
 │   │   ├── dto/
 │   │   │   ├── create-usuario.dto.ts
@@ -84,15 +95,11 @@ Sistema_de_reservas/
 npm install
 ```
 
-Crie o arquivo `.env` a partir do exemplo:
+Crie o arquivo `.env` a partir do exemplo e configure as credenciais do MySQL.
 
 ```bash
 cp .env.example .env
 ```
-
-No Windows, também é possível criar o arquivo manualmente copiando `.env.example` para `.env`.
-
-Configure as credenciais do MySQL no `.env`.
 
 ## Banco de dados
 
@@ -102,7 +109,17 @@ Execute:
 mysql -u root -p < sql/create_usuarios.sql
 ```
 
-O script cria o banco `sistema_reservas` e a tabela `usuarios`.
+O script cria o banco `sistema_reservas`, a tabela `usuarios`, a tabela `reservas` e o relacionamento entre elas.
+
+### Relacionamento
+
+```text
+Usuario 1 -------- N Reserva
+
+usuarios.id <---- reservas.usuario_id
+```
+
+Um usuário pode possuir várias reservas. Cada reserva pertence a exatamente um usuário.
 
 ## Executar
 
@@ -123,8 +140,6 @@ A API utiliza a porta `3000` por padrão.
 
 ## Swagger
 
-Depois de iniciar a aplicação:
-
 ```text
 http://localhost:3000/api/docs
 ```
@@ -133,36 +148,9 @@ O Swagger permite testar os endpoints e enviar o JWT pelo botão **Authorize**.
 
 ## Autenticação
 
-Primeiro faça o cadastro:
+Primeiro faça o cadastro em `POST /usuarios` e depois o login em `POST /auth/login`.
 
-```http
-POST /usuarios
-Content-Type: application/json
-
-{
-  "nome": "Maria Silva",
-  "email": "maria@email.com",
-  "senha": "123456",
-  "telefone": "11999999999",
-  "cep": "01001-000",
-  "profissao": "Desenvolvedora",
-  "data_nascimento": "1998-04-29"
-}
-```
-
-Depois faça login:
-
-```http
-POST /auth/login
-Content-Type: application/json
-
-{
-  "email": "maria@email.com",
-  "senha": "123456"
-}
-```
-
-Use o valor de `access_token` retornado:
+Use o `access_token` retornado no cabeçalho:
 
 ```http
 Authorization: Bearer <access_token>
@@ -182,23 +170,53 @@ Authorization: Bearer <access_token>
 | GET | `/auth/session` | JWT | Consultar sessão |
 | GET | `/endereco/:cep` | JWT | Consultar endereço |
 | GET | `/endereco/:cep/coordenadas` | JWT | Consultar endereço e coordenadas |
+| POST | `/reservas` | JWT | Criar reserva |
+| GET | `/reservas` | JWT | Listar reservas do usuário |
+| GET | `/reservas/:id` | JWT | Buscar uma reserva |
+| PATCH | `/reservas/:id` | JWT | Atualizar reserva |
+| DELETE | `/reservas/:id` | JWT | Cancelar reserva |
 
-## Regras de negócio
+## Regras de reservas
+
+1. Toda reserva pertence ao usuário autenticado.
+2. A data de início deve ser anterior à data de fim.
+3. A quantidade de pessoas deve ser maior ou igual a 1.
+4. Uma reserva nova inicia com status `PENDENTE`.
+5. Os status disponíveis são `PENDENTE`, `CONFIRMADA`, `CANCELADA` e `CONCLUIDA`.
+6. Reservas canceladas não podem ser alteradas.
+7. Reservas concluídas não podem ser alteradas ou canceladas.
+8. Um usuário só pode consultar ou alterar as próprias reservas através dos endpoints públicos da API.
+9. O relacionamento utiliza `reservas.usuario_id` como chave estrangeira para `usuarios.id`.
+10. A exclusão de um usuário exclui suas reservas relacionadas por `ON DELETE CASCADE`.
+
+## Regras de usuários e endereço
 
 1. Todos os campos obrigatórios são validados.
-2. O e-mail deve possuir formato válido.
-3. O e-mail não pode ser duplicado.
-4. A senha deve possuir pelo menos 6 caracteres no cadastro.
-5. A senha nunca é retornada nas consultas de usuários.
-6. A senha é armazenada utilizando hash bcrypt.
-7. O CEP precisa conter 8 números, podendo ser informado com ou sem hífen.
-8. O cadastro consulta o ViaCEP para obter o endereço.
-9. CEP inexistente retorna `404`.
-10. CEP inválido retorna `400`.
-11. Falha no serviço externo de CEP retorna `503`.
-12. As rotas privadas exigem JWT válido.
-13. Atualização de CEP consulta novamente o ViaCEP e atualiza os dados de endereço.
-14. A consulta de coordenadas utiliza a cidade retornada pelo CEP e o serviço de geocodificação do Open-Meteo.
+2. O e-mail deve possuir formato válido e não pode ser duplicado.
+3. A senha deve possuir pelo menos 6 caracteres no cadastro.
+4. A senha é armazenada utilizando hash bcrypt e nunca é retornada nas consultas.
+5. O CEP precisa conter 8 números, podendo ser informado com ou sem hífen.
+6. O cadastro consulta o ViaCEP para obter o endereço.
+7. CEP inexistente retorna `404`.
+8. CEP inválido retorna `400`.
+9. Falha no serviço externo de CEP retorna `503`.
+10. Atualização de CEP consulta novamente o ViaCEP e atualiza os dados de endereço.
+11. A consulta de coordenadas utiliza a cidade retornada pelo CEP e o serviço de geocodificação do Open-Meteo.
+
+## Exemplo: criar reserva
+
+```http
+POST /reservas
+Authorization: Bearer <access_token>
+Content-Type: application/json
+
+{
+  "data_inicio": "2026-10-10",
+  "data_fim": "2026-10-15",
+  "quantidade_pessoas": 2,
+  "observacoes": "Reserva para viagem de férias."
+}
+```
 
 ## Variáveis de ambiente
 
@@ -215,7 +233,3 @@ SESSION_SECRET=altere-este-segredo
 ```
 
 Nunca publique o `.env` real no GitHub.
-
-## Próxima evolução
-
-O próximo passo natural é implementar o domínio real de reservas, com entidades como reserva, recurso/serviço e disponibilidade, relacionando essas tabelas ao usuário existente. Essa etapa deve ser feita somente quando as regras de negócio de reservas estiverem definidas.
