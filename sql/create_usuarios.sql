@@ -18,3 +18,26 @@ CREATE TABLE IF NOT EXISTS usuarios (
   criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
+
+CREATE TABLE IF NOT EXISTS reservas (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  usuario_id INT NOT NULL,
+  data_inicio DATE NOT NULL,
+  data_fim DATE NOT NULL,
+  quantidade_pessoas INT NOT NULL,
+  status ENUM('PENDENTE', 'CONFIRMADA', 'CANCELADA', 'CONCLUIDA') NOT NULL DEFAULT 'PENDENTE',
+  observacoes VARCHAR(500) NULL,
+  criado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  atualizado_em TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  CONSTRAINT fk_reservas_usuario
+    FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
+    ON UPDATE CASCADE
+    ON DELETE CASCADE,
+  CONSTRAINT chk_reservas_quantidade_pessoas
+    CHECK (quantidade_pessoas >= 1),
+  CONSTRAINT chk_reservas_periodo
+    CHECK (data_fim > data_inicio),
+  INDEX idx_reservas_usuario (usuario_id),
+  INDEX idx_reservas_status (status),
+  INDEX idx_reservas_periodo (data_inicio, data_fim)
+);
