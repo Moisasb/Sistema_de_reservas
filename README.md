@@ -81,7 +81,7 @@ Sistema_de_reservas/
 │   ├── app.module.ts
 │   └── main.ts
 ├── sql/
-│   └── create_usuarios.sql
+│   └── schema.sql
 ├── .env.example
 ├── .gitignore
 ├── package.json
@@ -106,7 +106,7 @@ cp .env.example .env
 Execute:
 
 ```bash
-mysql -u root -p < sql/create_usuarios.sql
+mysql -u root -p < sql/schema.sql
 ```
 
 O script cria o banco `sistema_reservas`, a tabela `usuarios`, a tabela `reservas` e o relacionamento entre elas.
@@ -180,14 +180,16 @@ Authorization: Bearer <access_token>
 
 1. Toda reserva pertence ao usuário autenticado.
 2. A data de início deve ser anterior à data de fim.
-3. A quantidade de pessoas deve ser maior ou igual a 1.
-4. Uma reserva nova inicia com status `PENDENTE`.
-5. Os status disponíveis são `PENDENTE`, `CONFIRMADA`, `CANCELADA` e `CONCLUIDA`.
-6. Reservas canceladas não podem ser alteradas.
-7. Reservas concluídas não podem ser alteradas ou canceladas.
-8. Um usuário só pode consultar ou alterar as próprias reservas através dos endpoints públicos da API.
-9. O relacionamento utiliza `reservas.usuario_id` como chave estrangeira para `usuarios.id`.
-10. A exclusão de um usuário exclui suas reservas relacionadas por `ON DELETE CASCADE`.
+3. As datas devem ser informadas no formato `YYYY-MM-DD`.
+4. A quantidade de pessoas deve ser maior ou igual a 1.
+5. Uma reserva nova inicia com status `PENDENTE`.
+6. Os status disponíveis são `PENDENTE`, `CONFIRMADA`, `CANCELADA` e `CONCLUIDA`.
+7. Reservas canceladas não podem ser alteradas.
+8. Reservas concluídas não podem ser alteradas ou canceladas.
+9. Um usuário só pode consultar ou alterar as próprias reservas através dos endpoints da API.
+10. O relacionamento utiliza `reservas.usuario_id` como chave estrangeira para `usuarios.id`.
+11. A exclusão de um usuário exclui suas reservas relacionadas por `ON DELETE CASCADE`.
+12. As observações são opcionais e possuem limite de 500 caracteres.
 
 ## Regras de usuários e endereço
 
