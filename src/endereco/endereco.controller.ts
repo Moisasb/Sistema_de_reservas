@@ -20,11 +20,20 @@ export class EnderecoController {
   @ApiResponse({ status: 200, description: 'Endereço encontrado.' })
   @ApiResponse({ status: 400, description: 'CEP inválido.' })
   @ApiResponse({ status: 404, description: 'CEP não encontrado.' })
-  @ApiResponse({
-    status: 503,
-    description: 'Falha na comunicação com o serviço de CEP.',
-  })
+  @ApiResponse({ status: 503, description: 'Falha na comunicação com o serviço de CEP.' })
   buscarEndereco(@Param('cep') cep: string) {
     return this.enderecoService.buscarEnderecoPorCep(cep);
+  }
+
+  @Get(':cep/coordenadas')
+  @ApiBearerAuth('access-token')
+  @ApiOperation({ summary: 'Consultar endereço e coordenadas geográficas por CEP' })
+  @ApiParam({ name: 'cep', example: '01001000' })
+  @ApiResponse({ status: 200, description: 'Endereço e coordenadas encontrados.' })
+  @ApiResponse({ status: 400, description: 'CEP inválido.' })
+  @ApiResponse({ status: 404, description: 'CEP ou localidade não encontrados.' })
+  @ApiResponse({ status: 503, description: 'Falha na comunicação com serviço externo.' })
+  buscarCoordenadas(@Param('cep') cep: string) {
+    return this.enderecoService.buscarCepComCoordenadas(cep);
   }
 }
