@@ -9,9 +9,12 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
 
+  app.enableCors();
+
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
+      forbidNonWhitelisted: true,
       transform: true,
     }),
   );
@@ -21,14 +24,18 @@ async function bootstrap() {
       secret: configService.get<string>('SESSION_SECRET') || 'segredo',
       resave: false,
       saveUninitialized: false,
-      cookie: { maxAge: 1000 * 60 * 60 * 24 },
+      cookie: {
+        maxAge: 1000 * 60 * 60 * 24,
+        httpOnly: true,
+        sameSite: 'lax',
+      },
     }),
   );
 
   const config = new DocumentBuilder()
     .setTitle('Sistema de Reservas')
     .setDescription(
-      'API do Sistema de Reservas desenvolvida em NestJS com autenticação JWT, banco de dados MySQL, integração com serviço externo de CEP (ViaCEP) e Session.',
+      'API em NestJS para gerenciamento de usuários, autenticação JWT, sessões, MySQL e integração com serviços externos de endereço e geolocalização.',
     )
     .setVersion('1.0')
     .addBearerAuth(
