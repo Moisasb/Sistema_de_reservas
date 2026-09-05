@@ -1,5 +1,22 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, Req } from '@nestjs/common';
-import { ApiBearerAuth, ApiOperation, ApiParam, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  ParseIntPipe,
+  Patch,
+  Post,
+  Req,
+  UnauthorizedException,
+} from '@nestjs/common';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiParam,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 import type { Request } from 'express';
 import { CreateReservaDto } from './dto/create-reserva.dto';
 import { UpdateReservaDto } from './dto/update-reserva.dto';
@@ -48,9 +65,9 @@ export class ReservasController {
   }
 
   private usuarioId(req: Request): number {
-    const usuario = req.user as { sub?: number } | undefined;
+    const usuario = req['user'] as { sub?: number } | undefined;
     if (!usuario?.sub) {
-      throw new Error('Usuário autenticado não identificado.');
+      throw new UnauthorizedException('Usuário autenticado não identificado.');
     }
     return Number(usuario.sub);
   }
